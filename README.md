@@ -7,7 +7,7 @@ The git repo for UWL cs341 project
 [Markdown Reference #1 - Basic Syntax](https://www.markdownguide.org/basic-syntax/) - For marking documents like this one!  
 [Markdown Reference #2 - Extended Syntax](https://www.markdownguide.org/extended-syntax/) - For some of Markdown's more advanced features!  
 
-[Figma - Project Web Design](https://www.figma.com/design/jUwgIveQemtMa3wb4NB8nI/Web-Design?node-id=0-1&t=600qzxgy1fLVfIgC-1)  
+[Figma - Project Web Design](https://www.figma.com/files/team/1466824296963614648/all-projects?fuid=1466822239582176497)  
 [Mockaroo - Generate Fake Data](https://www.mockaroo.com/projects/55159)
 
 ### Project Docs
