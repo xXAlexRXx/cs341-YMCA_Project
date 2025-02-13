@@ -16,9 +16,10 @@ The git repo for UWL cs341 project
 
 [Functional Requirements]()  
 [Meeting Log 2]()  
+[Meeting Log 3]()
 
-[UML Diagram]()  
-[Meeting Log 3]()  
+[UML Diagram](https://github.com/xXAlexRXx/cs341-YMCA_Project/blob/a0131fa27834f006573acf5ae26d38c2329dcb97/UMLDIAGRAM.md) and [Mermaid Syntax](https://mermaid.js.org/ecosystem/tutorials.html): Useful for the creation of diagrams.
+[Meeting Log 4]()  
  
 ### Project Document Distribution
 | Documents | Distribution | Due Date |
