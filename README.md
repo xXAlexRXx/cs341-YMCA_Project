@@ -24,9 +24,9 @@ The git repo for UWL cs341 project
 | Documents | Distribution | Due Date |
 |-----------|--------------|----------|
 |POV & Plan |   Everyone   | 02/06/25 |
-|Functional Requirements, Use Cases, User Stories, Assumptions| | 02/20/25 |
+|Functional Requirements, Use Cases, User Stories, Assumptions| Everyone | 02/20/25 |
 |**First DEMO**| Everyone  | 03/06/25 |
-|UML Diagram|              | 03/27/25 |
+|UML Diagram|        | 03/27/25 |
 |**Second DEMO**| Everyone | 04/10/25 |
 |Update Doc 2 & 3|         | 04/24/25 |
 |**Final DEMO**| Everyone  | 05/08/25 |
