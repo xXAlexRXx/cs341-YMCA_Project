@@ -1,7 +1,7 @@
 # CS341-YMCA_Project
 The git repository for UWL CS341 project - Group #4
 
-#Authors
+# Authors
 Alexander Roedel, Elliot Maringer, Dylan Schultz, Bennett Stanfield
 ## Links for different parts of the project
 ### Design Links
