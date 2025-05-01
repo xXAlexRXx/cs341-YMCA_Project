@@ -1,6 +1,8 @@
 # CS341-YMCA_Project
 The git repository for UWL CS341 project - Group #4
 
+#Authors
+Alexander Roedel, Elliot Maringer, Dylan Schultz, Bennett Stanfield
 ## Links for different parts of the project
 ### Design Links
 [Markdown Reference #1 - Basic Syntax](https://www.markdownguide.org/basic-syntax/) - For marking documents like this one!  
