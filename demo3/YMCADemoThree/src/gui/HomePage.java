@@ -1,16 +1,34 @@
 package gui;
 
-import database.Database;
-
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Desktop;
+import java.awt.Font;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import javax.swing.*;
+
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+import javax.swing.WindowConstants;
 import javax.swing.table.DefaultTableModel;
 
+import database.Database;
+
+/**
+ * HomePage is the initial window for the YMCA application.
+ * Users can navigate to create an account, log in, view available programs,
+ * or open the navigation guide PDF.
+ */
 public class HomePage extends JFrame {
 
     private static final long serialVersionUID = 1L;
@@ -21,8 +39,8 @@ public class HomePage extends JFrame {
         setLocationRelativeTo(null);
         setResizable(false);
         setTitle("YMCA Home");
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        
+        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+
         startUpPane = new JPanel();
         startUpPane.setBackground(new Color(49, 49, 49));
         startUpPane.setLayout(null);
@@ -32,44 +50,52 @@ public class HomePage extends JFrame {
         setVisible(true);
     }
 
+    /**
+     * Initializes all UI components: labels, buttons, and action listeners.
+     */
     private void initializeComponents() {
 
-        // Title label in the center at the top
+        // YMCA logo image
+        ImageIcon logoIcon = new ImageIcon(getClass().getResource("/images/ymca-logo.png"));
+        Image scaledLogo = logoIcon.getImage().getScaledInstance(120, 120, Image.SCALE_SMOOTH);
+        JLabel logoLabel = new JLabel(new ImageIcon(scaledLogo));
+        logoLabel.setBounds(30, 20, 120, 120);
+        startUpPane.add(logoLabel);
+
+        // Title text at the top center
         JLabel titleLabel = new JLabel("<html><strong>Welcome to the <em style=\"color:white\">YMCA</html>");
         titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
         titleLabel.setForeground(Color.WHITE);
         titleLabel.setFont(new Font("Tahoma", Font.PLAIN, 60));
         titleLabel.setBounds(290, 39, 683, 80);
         startUpPane.add(titleLabel);
-        
-        // Get started label below the title
+
+        // Description prompt below title
         JLabel getStarted = new JLabel("<html><center>Click one of the buttons below, to get started</html>");
         getStarted.setFont(new Font("Tahoma", Font.PLAIN, 24));
-        getStarted.setForeground(new Color(255, 255, 255));
+        getStarted.setForeground(Color.WHITE);
         getStarted.setBounds(490, 102, 284, 161);
         startUpPane.add(getStarted);
-        
-        // Create Account Button
+
+        // Button: Create Account
         JButton accountCreateBtn = new JButton("<html><center><middle>Create <br>an <br>Account</html>");
         accountCreateBtn.setFont(new Font("Tahoma", Font.PLAIN, 30));
         accountCreateBtn.setBounds(419, 260, 200, 200);
         startUpPane.add(accountCreateBtn);
-
         accountCreateBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 dispose();
-                // new AccountCreationPage();
+                new AccountCreationPage();
             }
         });
-        
-        // Log In Button
+
+        // Button: Log In
         JButton logInBtn = new JButton("<html><center><middle>Log <br>In</html>");
-        logInBtn.setForeground(new Color(0, 0, 0));
+        logInBtn.setForeground(Color.BLACK);
         logInBtn.setFont(new Font("Tahoma", Font.PLAIN, 30));
         logInBtn.setBounds(629, 260, 200, 200);
         startUpPane.add(logInBtn);
-
         logInBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -77,13 +103,12 @@ public class HomePage extends JFrame {
                 new LoginPage();
             }
         });
-        
-        // Programs Button
+
+        // Button: View Programs
         JButton programsBtn = new JButton("<html><center><middle>Our <br>Programs</html>");
         programsBtn.setFont(new Font("Tahoma", Font.PLAIN, 30));
         programsBtn.setBounds(419, 471, 200, 200);
         startUpPane.add(programsBtn);
-
         programsBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -91,32 +116,41 @@ public class HomePage extends JFrame {
                 new ProgramsPage();
             }
         });
-        
-        // Navigation Guide Button
+
+        // Button: Navigation Guide PDF
         JButton navGuideBtn = new JButton("<html><center><middle>Navigation <br>Guide</html>");
         navGuideBtn.setFont(new Font("Tahoma", Font.PLAIN, 30));
         navGuideBtn.setBounds(629, 471, 200, 200);
         startUpPane.add(navGuideBtn);
-
         navGuideBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // new NavGuidePage();
+                String filePath = "src/images/CS341 YMCA User Manual.pdf";
+                File userManual = new File(filePath);
+
+                if (userManual.exists()) {
+                    try {
+                        Desktop.getDesktop().open(userManual);
+                    } catch (IOException ioe) {
+                        JOptionPane.showMessageDialog(null, "Error opening user manual.");
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(null, "User manual not found:\n" + userManual.getAbsolutePath());
+                }
             }
         });
-        
-        // Initially load all programs
+
+        // Optional preload of programs (not visible here, but backend logic)
         loadPrograms("");
     }
 
     /**
-     * Loads programs from the database.
+     * Loads programs from the database. Intended for internal use.
      * If searchTerm is empty, all programs are loaded.
-     * Otherwise, only programs with names matching the search term are loaded.
      */
     private void loadPrograms(String searchTerm) {
         Database db = new Database();
-        
+
         try {
             db.connect();
             String query;
@@ -125,16 +159,16 @@ public class HomePage extends JFrame {
             } else {
                 query = "SELECT * FROM Program WHERE program_name LIKE '%" + searchTerm + "%'";
             }
-            
+
             ResultSet rs = db.runQuery(query);
             ResultSetMetaData rsmd = rs.getMetaData();
             int columnCount = rsmd.getColumnCount();
-            
+
             DefaultTableModel model = new DefaultTableModel();
             for (int i = 1; i <= columnCount; i++) {
                 model.addColumn(rsmd.getColumnLabel(i));
             }
-            
+
             while (rs.next()) {
                 Object[] rowData = new Object[columnCount];
                 for (int i = 1; i <= columnCount; i++) {
@@ -142,7 +176,7 @@ public class HomePage extends JFrame {
                 }
                 model.addRow(rowData);
             }
-            
+
             rs.close();
         } catch (SQLException e) {
             e.printStackTrace();

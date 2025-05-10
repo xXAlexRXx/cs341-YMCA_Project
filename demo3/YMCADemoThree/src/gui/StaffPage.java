@@ -1,22 +1,47 @@
 package gui;
 
-import java.awt.*;
-import javax.swing.*;
-import model.Program;
-import model.User;
-import database.Database;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
+import java.util.Date;
 
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.SpinnerDateModel;
+import javax.swing.SwingConstants;
+import javax.swing.WindowConstants;
+
+import com.toedter.calendar.JDateChooser;
+
+import database.Database;
+import model.Program;
+import model.User;
+
+/**
+ * StaffPage provides a UI for staff members to create new YMCA programs.
+ * It includes fields for schedule, capacity, description, prerequisites, and validations.
+ */
 public class StaffPage extends JFrame {
 
     private static final long serialVersionUID = 1L;
     private JPanel staffPane;
-    private JTextField nameField, dateField, timeField, locationField, priceField, maxParticipantsField, prerequisitesField;
+    private JTextField nameField, locationField, priceField, maxParticipantsField, prerequisitesField;
+    private com.toedter.calendar.JDateChooser startChooser, endChooser;
     private JTextArea descriptionArea;
     private JCheckBox monBox, tueBox, wedBox, thuBox, friBox, satBox, sunBox;
     private User currentUser;
+    private JSpinner startTimeSpinner, endTimeSpinner;
 
     public StaffPage(User user) {
         this.currentUser = user;
@@ -24,7 +49,7 @@ public class StaffPage extends JFrame {
         setLocationRelativeTo(null);
         setResizable(false);
         setTitle("Staff Work Page");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         staffPane = new JPanel();
         staffPane.setBackground(new Color(49, 49, 49));
@@ -35,19 +60,23 @@ public class StaffPage extends JFrame {
         setVisible(true);
     }
 
-    private void setPlaceholder(JTextField field, String placeholder) {
+    // Adds placeholder logic to input fields
+    @SuppressWarnings("unused")
+	private void setPlaceholder(JTextField field, String placeholder) {
         field.setForeground(Color.GRAY);
         field.setText(placeholder);
 
         field.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusGained(java.awt.event.FocusEvent e) {
+            @Override
+			public void focusGained(java.awt.event.FocusEvent e) {
                 if (field.getText().equals(placeholder)) {
                     field.setText("");
                     field.setForeground(Color.BLACK);
                 }
             }
 
-            public void focusLost(java.awt.event.FocusEvent e) {
+            @Override
+			public void focusLost(java.awt.event.FocusEvent e) {
                 if (field.getText().isEmpty()) {
                     field.setForeground(Color.GRAY);
                     field.setText(placeholder);
@@ -56,18 +85,19 @@ public class StaffPage extends JFrame {
         });
     }
 
+    // Creates top layout: nav bar, buttons, form
     private void initializeComponents() {
         createTopButtons();
         createTitleLabel();
         createFormFields();
         createProgramButton();
 
-        // ✅ Use UserNavBar for staff context
         UserNavBar navBar = new UserNavBar(currentUser);
         navBar.setBounds(0, 0, 1280, 50);
         staffPane.add(navBar);
     }
 
+    // Creates nav-style buttons for navigating to other staff pages
     private void createTopButtons() {
         JButton button1 = new JButton("My Programs");
         button1.setFont(new Font("Tahoma", Font.PLAIN, 12));
@@ -88,6 +118,7 @@ public class StaffPage extends JFrame {
         staffPane.add(button2);
     }
 
+    // Header label for the page
     private void createTitleLabel() {
         JLabel titleLabel = new JLabel("Staff Work Page", SwingConstants.CENTER);
         titleLabel.setForeground(Color.WHITE);
@@ -96,6 +127,7 @@ public class StaffPage extends JFrame {
         staffPane.add(titleLabel);
     }
 
+    // Lays out and populates all form fields for input
     private void createFormFields() {
         int leftX = 100, rightX = 560, topY = 250, rowHeight = 40, labelWidth = 160, fieldWidth = 340;
 
@@ -115,20 +147,73 @@ public class StaffPage extends JFrame {
         staffPane.add(createAlignedField("Prerequisites:", prerequisitesField, leftX, topY += rowHeight, labelWidth, fieldWidth));
 
         topY = 250;
-        dateField = new JTextField();
-        setPlaceholder(dateField, "mm/dd/yyyy - mm/dd/yyyy");
-        staffPane.add(createAlignedField("Date:", dateField, rightX, topY, labelWidth, fieldWidth));
+        startChooser = new JDateChooser();
+        endChooser = new JDateChooser();
+
+        // Date inputs
+        JPanel datePanel = new JPanel(null);
+        datePanel.setBounds(rightX, topY, labelWidth + fieldWidth + 10, 30);
+        datePanel.setBackground(new Color(49, 49, 49));
+
+        JLabel label = new JLabel("Date:", SwingConstants.RIGHT);
+        label.setForeground(Color.WHITE);
+        label.setFont(new Font("Tahoma", Font.PLAIN, 12));
+        label.setBounds(0, 0, labelWidth, 30);
+        datePanel.add(label);
+
+        startChooser.setBounds(labelWidth + 10, 0, 150, 30);
+        endChooser.setBounds(labelWidth + 190, 0, 150, 30);
+        datePanel.add(startChooser);
+        datePanel.add(endChooser);
+        staffPane.add(datePanel);
+
+        JLabel toLabel = new JLabel("to");
+        toLabel.setForeground(Color.WHITE);
+        toLabel.setBounds(labelWidth + 165, 0, 20, 30);
+        datePanel.add(toLabel);
+
         topY += rowHeight;
 
-        timeField = new JTextField();
-        setPlaceholder(timeField, "hh:mm AM/PM - hh:mm AM/PM");
-        staffPane.add(createAlignedField("Time:", timeField, rightX, topY, labelWidth, fieldWidth));
+        // Time input fields
+        JPanel timePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        timePanel.setBounds(rightX, topY, labelWidth + fieldWidth + 10, 30);
+        timePanel.setBackground(new Color(49, 49, 49));
+
+        JLabel timeLabel = new JLabel("Time:");
+        timeLabel.setForeground(Color.WHITE);
+        timeLabel.setFont(new Font("Tahoma", Font.PLAIN, 12));
+        timeLabel.setPreferredSize(new Dimension(labelWidth, 30));
+        timeLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+
+        startTimeSpinner = new JSpinner(new SpinnerDateModel());
+        endTimeSpinner = new JSpinner(new SpinnerDateModel());
+
+        JSpinner.DateEditor startEditor = new JSpinner.DateEditor(startTimeSpinner, "hh:mm a");
+        JSpinner.DateEditor endEditor = new JSpinner.DateEditor(endTimeSpinner, "hh:mm a");
+
+        startTimeSpinner.setEditor(startEditor);
+        endTimeSpinner.setEditor(endEditor);
+
+        startTimeSpinner.setPreferredSize(new Dimension(100, 25));
+        endTimeSpinner.setPreferredSize(new Dimension(100, 25));
+
+        JLabel toTimeLabel = new JLabel("to");
+        toTimeLabel.setForeground(Color.WHITE);
+        toTimeLabel.setFont(new Font("Tahoma", Font.PLAIN, 12));
+
+        timePanel.add(timeLabel);
+        timePanel.add(startTimeSpinner);
+        timePanel.add(toTimeLabel);
+        timePanel.add(endTimeSpinner);
+        staffPane.add(timePanel);
+
         topY += rowHeight;
 
         createDaySelection(rightX, topY, labelWidth, fieldWidth);
         createDescriptionField(rightX, 250 + rowHeight * 3, labelWidth, fieldWidth);
     }
 
+    // Checkbox panel for selecting days of the week
     private void createDaySelection(int x, int y, int labelWidth, int fieldWidth) {
         JLabel daysLabel = new JLabel("Days:");
         daysLabel.setForeground(Color.WHITE);
@@ -137,8 +222,8 @@ public class StaffPage extends JFrame {
         daysLabel.setBounds(x, y , labelWidth, 30);
         staffPane.add(daysLabel);
 
-        JPanel daysPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 3, 0)); 
-        daysPanel.setBounds(x + labelWidth + 3, y, fieldWidth + 40, 30); 
+        JPanel daysPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 3, 0));
+        daysPanel.setBounds(x + labelWidth + 3, y, fieldWidth + 40, 30);
         daysPanel.setBackground(new Color(49, 49, 49));
 
         monBox = new JCheckBox("Mon"); tueBox = new JCheckBox("Tue"); wedBox = new JCheckBox("Wed");
@@ -153,6 +238,7 @@ public class StaffPage extends JFrame {
         staffPane.add(daysPanel);
     }
 
+    // Scrollable multi-line input for program description
     private void createDescriptionField(int x, int y, int labelWidth, int fieldWidth) {
         JLabel descriptionLabel = new JLabel("Description:");
         descriptionLabel.setForeground(Color.WHITE);
@@ -171,6 +257,7 @@ public class StaffPage extends JFrame {
         staffPane.add(scrollPane);
     }
 
+    // Creates aligned form field pairs
     private JPanel createAlignedField(String labelText, JTextField field, int x, int y, int labelWidth, int fieldWidth) {
         JPanel panel = new JPanel(null);
         panel.setBackground(new Color(49, 49, 49));
@@ -189,6 +276,7 @@ public class StaffPage extends JFrame {
         return panel;
     }
 
+    // Button to finalize and submit a new program
     private void createProgramButton() {
         JButton createProgram = new JButton("Finalize Program");
         createProgram.setFont(new Font("Tahoma", Font.PLAIN, 20));
@@ -197,16 +285,15 @@ public class StaffPage extends JFrame {
         staffPane.add(createProgram);
     }
 
+    // Builds and submits a Program object to the database with all validation checks
     private void createProgramInDatabase() {
         String programName = nameField.getText().trim();
-        String date = dateField.getText().trim();
-        String time = timeField.getText().trim();
         String location = locationField.getText().trim();
         String priceText = priceField.getText().trim();
         String maxParticipantsText = maxParticipantsField.getText().trim();
         String prerequisites = prerequisitesField.getText().trim();
 
-        if (programName.isEmpty() || date.isEmpty() || time.isEmpty() || maxParticipantsText.isEmpty()) {
+        if (programName.isEmpty() || startChooser.getDate() == null || endChooser.getDate() == null || maxParticipantsText.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Missing required fields.");
             return;
         }
@@ -215,13 +302,27 @@ public class StaffPage extends JFrame {
         int maxParticipants = Integer.parseInt(maxParticipantsText);
 
         StringBuilder selectedDays = new StringBuilder();
-        if (monBox.isSelected()) selectedDays.append("Mon, ");
-        if (tueBox.isSelected()) selectedDays.append("Tue, ");
-        if (wedBox.isSelected()) selectedDays.append("Wed, ");
-        if (thuBox.isSelected()) selectedDays.append("Thu, ");
-        if (friBox.isSelected()) selectedDays.append("Fri, ");
-        if (satBox.isSelected()) selectedDays.append("Sat, ");
-        if (sunBox.isSelected()) selectedDays.append("Sun, ");
+        if (monBox.isSelected()) {
+			selectedDays.append("Mon, ");
+		}
+        if (tueBox.isSelected()) {
+			selectedDays.append("Tue, ");
+		}
+        if (wedBox.isSelected()) {
+			selectedDays.append("Wed, ");
+		}
+        if (thuBox.isSelected()) {
+			selectedDays.append("Thu, ");
+		}
+        if (friBox.isSelected()) {
+			selectedDays.append("Fri, ");
+		}
+        if (satBox.isSelected()) {
+			selectedDays.append("Sat, ");
+		}
+        if (sunBox.isSelected()) {
+			selectedDays.append("Sun, ");
+		}
         String selectedDaysString = selectedDays.length() > 0 ? selectedDays.substring(0, selectedDays.length() - 2) : "None";
 
         long staffId = currentUser.getUserId();
@@ -236,30 +337,24 @@ public class StaffPage extends JFrame {
             }
         }
 
-        String[] dates = date.split("-");
-        if (dates.length != 2) {
-            JOptionPane.showMessageDialog(this, "Date format must be mm/dd/yyyy - mm/dd/yyyy.");
+        if (startChooser.getDate() == null || endChooser.getDate() == null) {
+            JOptionPane.showMessageDialog(this, "Please select both start and end dates.");
             return;
         }
 
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
-        LocalDate programStartDate = LocalDate.parse(dates[0].trim(), dateFormatter);
-        LocalDate programEndDate = LocalDate.parse(dates[1].trim(), dateFormatter);
+        LocalDate programStartDate = startChooser.getDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+        LocalDate programEndDate = endChooser.getDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
 
         if (programStartDate.isBefore(LocalDate.now())) {
             JOptionPane.showMessageDialog(this, "Program cannot start before today's date.");
             return;
         }
 
-        String[] times = time.split("-");
-        if (times.length != 2) {
-            JOptionPane.showMessageDialog(this, "Time format must be hh:mm AM/PM - hh:mm AM/PM.");
-            return;
-        }
+        Date startDate = (Date) startTimeSpinner.getValue();
+        Date endDate = (Date) endTimeSpinner.getValue();
 
-        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("h:mm a");
-        LocalTime programStartTime = LocalTime.parse(times[0].trim(), timeFormatter);
-        LocalTime programEndTime = LocalTime.parse(times[1].trim(), timeFormatter);
+        LocalTime programStartTime = startDate.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalTime();
+        LocalTime programEndTime = endDate.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalTime();
 
         Program program = new Program();
         program.setProgramName(programName);
@@ -293,16 +388,15 @@ public class StaffPage extends JFrame {
             db.addProgram(program);
             JOptionPane.showMessageDialog(this, "Program created successfully!");
 
+            // Reset form
             nameField.setText("");
             locationField.setText("");
             priceField.setText("");
             maxParticipantsField.setText("");
             prerequisitesField.setText("");
             descriptionArea.setText("");
-            dateField.setText("mm/dd/yyyy - mm/dd/yyyy");
-            dateField.setForeground(Color.GRAY);
-            timeField.setText("hh:mm AM/PM - hh:mm AM/PM");
-            timeField.setForeground(Color.GRAY);
+            startChooser.setDate(null);
+            endChooser.setDate(null);
 
             monBox.setSelected(false);
             tueBox.setSelected(false);

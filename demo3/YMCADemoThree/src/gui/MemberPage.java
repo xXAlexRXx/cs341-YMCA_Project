@@ -2,25 +2,41 @@ package gui;
 
 import java.awt.Color;
 import java.awt.Font;
-import javax.swing.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.WindowConstants;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
 import database.Database;
 import model.User;
 
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-
+/**
+ * MemberPage serves as the dashboard for standard users (members).
+ * It displays available programs, allows for keyword search,
+ * and provides options to register, drop, or refresh listings.
+ */
 public class MemberPage extends JFrame {
 
     private static final long serialVersionUID = 1L;
     private JPanel startUpPane;
     private JTable programTable;
     private User currentUser;
-
+    DefaultTableCellRenderer centerRender;
     private JTextField searchField;
     private JButton searchButton;
 
@@ -30,7 +46,7 @@ public class MemberPage extends JFrame {
         setLocationRelativeTo(null);
         setResizable(false);
         setTitle("Member Dashboard");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         startUpPane = new JPanel();
         startUpPane.setBackground(new Color(49, 49, 49));
@@ -41,35 +57,46 @@ public class MemberPage extends JFrame {
         setVisible(true);
     }
 
+    /**
+     * Initializes the UI components including tables, buttons, labels, and listeners.
+     */
     private void initializeComponents() {
-        // Navbar
+        // Navbar with user session
         UserNavBar userNavBar = new UserNavBar(currentUser);
         userNavBar.setBounds(0, 0, 1280, 50);
         startUpPane.add(userNavBar);
 
+        // Welcome title
         JLabel titleLabel = new JLabel("Welcome to the YMCA");
         titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
         titleLabel.setForeground(Color.WHITE);
         titleLabel.setFont(new Font("Tahoma", Font.PLAIN, 40));
-        titleLabel.setBounds(10, 64, 472, 50);
+        titleLabel.setBounds(10, 64, 1244, 50);
         startUpPane.add(titleLabel);
 
-        // Scrollable program list
+        // Center-aligned cell renderer
+        centerRender = new DefaultTableCellRenderer();
+        centerRender.setHorizontalAlignment(SwingConstants.CENTER);
+
+        // Table view
         JScrollPane scrollPane = new JScrollPane();
-        scrollPane.setBounds(24, 167, 740, 300);
+        scrollPane.setBounds(119, 167, 1042, 300);
         startUpPane.add(scrollPane);
 
         programTable = new JTable();
+        programTable.setShowVerticalLines(false);
+        programTable.setRowHeight(30);
+        programTable.setRowSelectionAllowed(true);
         scrollPane.setViewportView(programTable);
 
-        // Search field
+        // Search input field
         searchField = new JTextField();
-        searchField.setBounds(24, 512, 200, 30);
+        searchField.setBounds(119, 512, 200, 30);
         startUpPane.add(searchField);
 
         // Search button
         searchButton = new JButton("Search");
-        searchButton.setBounds(265, 511, 100, 30);
+        searchButton.setBounds(329, 512, 100, 30);
         startUpPane.add(searchButton);
 
         searchButton.addMouseListener(new MouseAdapter() {
@@ -82,9 +109,10 @@ public class MemberPage extends JFrame {
 
         // Register button
         JButton registerButton = new JButton("Register");
-        registerButton.setBounds(408, 511, 100, 30);
+        registerButton.setBounds(512, 512, 100, 30);
         startUpPane.add(registerButton);
 
+        // Load dependents and allow selection for registration
         registerButton.addActionListener(e -> {
             Database db = new Database();
             try {
@@ -119,58 +147,82 @@ public class MemberPage extends JFrame {
                 db.disconnect();
             }
         });
-        
-        JButton dropButton = new JButton("Drop");
-        dropButton.setBounds(520, 511, 100, 30);
-        startUpPane.add(dropButton);
 
+        // Drop button for canceling registration
+        JButton dropButton = new JButton("Drop");
+        dropButton.setBounds(622, 512, 100, 30);
+        startUpPane.add(dropButton);
         dropButton.addActionListener(e -> {
             new DropProgramPage(currentUser).setVisible(true);
         });
 
-        // Labels
+        // Refresh table button
+        JButton refreshButton = new JButton("Refresh");
+        refreshButton.setBounds(732, 512, 100, 30);
+        startUpPane.add(refreshButton);
+        refreshButton.addActionListener(e -> {
+            String currentSearch = searchField.getText().trim();
+            loadPrograms(currentSearch);
+        });
+
+        // Table and input labels
         JLabel tableLabel = new JLabel("Available Programs");
+        tableLabel.setHorizontalAlignment(SwingConstants.CENTER);
         tableLabel.setForeground(Color.WHITE);
         tableLabel.setFont(new Font("Tahoma", Font.PLAIN, 16));
-        tableLabel.setBounds(36, 124, 147, 33);
+        tableLabel.setBounds(119, 124, 1042, 33);
         startUpPane.add(tableLabel);
 
         JLabel lookupLabel = new JLabel("Enter Keyword");
         lookupLabel.setForeground(Color.WHITE);
         lookupLabel.setFont(new Font("Tahoma", Font.PLAIN, 14));
-        lookupLabel.setBounds(64, 477, 92, 23);
+        lookupLabel.setBounds(119, 478, 200, 23);
         startUpPane.add(lookupLabel);
 
         loadPrograms("");
     }
 
+    /**
+     * Loads all programs from the database or filters by a search term.
+     */
     private void loadPrograms(String searchTerm) {
         Database db = new Database();
         try {
             db.connect();
             String query = (searchTerm == null || searchTerm.isEmpty()) ?
-                db.getAllPrograms() :
-                "SELECT * FROM Program WHERE program_name LIKE '%" + searchTerm + "%'";
+                "SELECT program_name, start_date, end_date, start_time, end_time, days, price, current_capacity, capacity FROM Program" :
+                "SELECT program_name, start_date, end_date, start_time, end_time, days, price, current_capacity, capacity FROM Program WHERE program_name LIKE '%" + searchTerm + "%'";
 
             ResultSet rs = db.runQuery(query);
-            ResultSetMetaData rsmd = rs.getMetaData();
-            int columnCount = rsmd.getColumnCount();
 
             DefaultTableModel model = new DefaultTableModel();
-            for (int i = 1; i <= columnCount; i++) {
-                model.addColumn(rsmd.getColumnLabel(i));
-            }
+            model.addColumn("Course");
+            model.addColumn("Start Date");
+            model.addColumn("End Date");
+            model.addColumn("Start Time");
+            model.addColumn("End Time");
+            model.addColumn("Days Offered");
+            model.addColumn("Price");
+            model.addColumn("Capacity (Filled/Max)");
 
             while (rs.next()) {
-                Object[] rowData = new Object[columnCount];
-                for (int i = 1; i <= columnCount; i++) {
-                    rowData[i - 1] = rs.getObject(i);
-                }
+                Object[] rowData = new Object[8];
+                rowData[0] = rs.getString("program_name");
+                rowData[1] = rs.getDate("start_date");
+                rowData[2] = rs.getDate("end_date");
+                rowData[3] = rs.getTime("start_time");
+                rowData[4] = rs.getTime("end_time");
+                rowData[5] = rs.getString("days");
+                rowData[6] = rs.getDouble("price");
+                rowData[7] = rs.getInt("current_capacity") + " / " + rs.getInt("capacity");
                 model.addRow(rowData);
             }
 
             rs.close();
             programTable.setModel(model);
+            for(int i = 0; i < 8; i++) {
+                programTable.getColumnModel().getColumn(i).setCellRenderer(centerRender);
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -178,4 +230,3 @@ public class MemberPage extends JFrame {
         }
     }
 }
-

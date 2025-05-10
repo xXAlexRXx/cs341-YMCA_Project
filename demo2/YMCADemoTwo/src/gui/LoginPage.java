@@ -1,13 +1,24 @@
 package gui;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Font;
+import java.awt.Image;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.sql.SQLException;
 
-import javax.swing.*;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFormattedTextField;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.SwingConstants;
+import javax.swing.WindowConstants;
 
 import database.Database;
 import model.User;
@@ -30,7 +41,7 @@ public class LoginPage extends JFrame {
     public LoginPage() {
         setResizable(false);
         setTitle("YMCA Login");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         loginPane = new JPanel();
         loginPane.setBackground(new Color(49, 49, 49));
@@ -86,7 +97,7 @@ public class LoginPage extends JFrame {
         welcome.setFont(new Font("Times New Roman", Font.BOLD | Font.ITALIC, 50));
         welcome.setBounds(10, 129, 644, 93);
         contentPane.add(welcome);
-        
+
         JLabel logo = new JLabel("");
         logo.setHorizontalAlignment(SwingConstants.CENTER);
         Image img = new ImageIcon(LoginPage.class.getResource("/images/ymca-logo.png")).getImage();
@@ -178,10 +189,12 @@ public class LoginPage extends JFrame {
         	public void mouseEntered(MouseEvent e) {
         		logo.setCursor(new Cursor(Cursor.HAND_CURSOR));
         	}
-        	public void mouseExited(MouseEvent e) {
+        	@Override
+			public void mouseExited(MouseEvent e) {
         		logo.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
         	}
-        	public void mouseReleased(MouseEvent e) {
+        	@Override
+			public void mouseReleased(MouseEvent e) {
         		dispose();
         		new HomePage();
         	}

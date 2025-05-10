@@ -1,22 +1,34 @@
 package gui;
 
-import java.awt.*;
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellRenderer;
-
-import database.DatabaseYMCA;
-import model.Registration;
-import model.User;
-
-import java.awt.event.*;
-
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.time.LocalDate;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.WindowConstants;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
+
+import database.DatabaseYMCA;
+import model.Registration;
+import model.User;
 
 public class UserPage extends JFrame {
 
@@ -36,18 +48,18 @@ public class UserPage extends JFrame {
 	        setLocationRelativeTo(null);
 	        setResizable(false);
 	        setTitle("User Page");
-	        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	        
+	        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+
 	        userPane = new JPanel();
 	        userPane.setBackground(new Color(49, 49, 49));
 	        userPane.setLayout(null);
 	        setContentPane(userPane);
-	        
+
 	        initializeComponents();
-	        
+
 	        setVisible(true);
 	    }
-	    
+
 	    private void initializeComponents() {
 	        // NavBar at the top
 	        NavBar navBar = new NavBar();
@@ -87,7 +99,7 @@ public class UserPage extends JFrame {
 	        userNameLabel.setBounds(800, 240, 100, 30);
 	        userPane.add(userNameLabel);
 
-	        userNameField = new JTextField(currentUser.getUsername()); 
+	        userNameField = new JTextField(currentUser.getUsername());
 	        // Pre-fill with currentUser's username, or leave blank
 	        userNameField.setBounds(900, 240, 100, 30);
 	        userPane.add(userNameField);
@@ -108,12 +120,12 @@ public class UserPage extends JFrame {
 	                try {
 	                    programId = Long.parseLong(programIdStr);
 	                } catch (NumberFormatException ex) {
-	                    JOptionPane.showMessageDialog(userPane, 
+	                    JOptionPane.showMessageDialog(userPane,
 	                        "Invalid Program ID. Please enter a valid numeric value.",
 	                        "Error", JOptionPane.ERROR_MESSAGE);
 	                    return;
 	                }
-	                
+
 	                DatabaseYMCA db = new DatabaseYMCA();
 	                db.connect();
 	                try {
@@ -127,16 +139,16 @@ public class UserPage extends JFrame {
 	                        programPrice = rsProg.getDouble("price");
 	                    }
 	                    rsProg.close();
-	                    
+
 	                    // If there is a requirement, check if the user has completed it.
 	                    if (requirement != 0) {
-	                        String checkReqQuery = "SELECT * FROM Registration WHERE user_id = " 
+	                        String checkReqQuery = "SELECT * FROM Registration WHERE user_id = "
 	                                + currentUser.getUserId() + " AND program_id = " + requirement;
 	                        ResultSet rsCheck = db.runQuery(checkReqQuery);
 	                        if (!rsCheck.next()) {
 	                            // User hasn't registered for the required program.
 	                            JOptionPane.showMessageDialog(userPane,
-	                                "Registration failed. You must complete the required program (ID: " 
+	                                "Registration failed. You must complete the required program (ID: "
 	                                + requirement + ") before registering for this program.",
 	                                "Registration Error",
 	                                JOptionPane.ERROR_MESSAGE);
@@ -145,31 +157,31 @@ public class UserPage extends JFrame {
 	                        }
 	                        rsCheck.close();
 	                    }
-	                    
+
 	                    // Determine charge amount based on user type
 	                    double chargeAmount = programPrice; // default full price
 	                    if (currentUser.getUserType().equalsIgnoreCase("Member")) {
 	                        chargeAmount = programPrice * 0.5;
 	                    }
 	                    // Optionally add different pricing logic for Staff or other types here
-	                    
+
 	                    // Instead of checking for sufficient balance, we now simply add the charge to the balance.
-	                    String updateBalanceQuery = "UPDATE User SET balance = balance + " + chargeAmount 
+	                    String updateBalanceQuery = "UPDATE User SET balance = balance + " + chargeAmount
 	                                                + " WHERE user_id = " + currentUser.getUserId();
 	                    db.runUpdate(updateBalanceQuery);
-	                    
+
 	                    // Proceed with inserting the registration record
 	                    Registration registration = new Registration();
 	                    registration.setUserId(currentUser.getUserId());
 	                    registration.setProgramId(programId);
 	                    registration.setRegistrationDate(LocalDate.now());
 	                    db.addRegistration(registration);
-	                    
+
 	                    // Optionally update the Program table's current_capacity via trigger or manually here
-	                    
+
 	                    // Open the registration complete page
 	                    new RegistrationPage(programId, currentUser.getUserId());
-	                    
+
 	                } catch (SQLException ex) {
 	                    ex.printStackTrace();
 	                } finally {
@@ -178,11 +190,11 @@ public class UserPage extends JFrame {
 	            }
 	        });
 
-	        
+
 	        searchField = new JTextField();
 	        searchField.setBounds(700, 410, 200, 30);
 	        userPane.add(searchField);
-	        
+
 	        searchButton = new JButton("Search");
 	        searchButton.setBounds(910, 410, 100, 30);
 	        userPane.add(searchButton);
@@ -195,7 +207,7 @@ public class UserPage extends JFrame {
 	                loadPrograms(searchTerm);
 	            }
 	        });
-	        
+
 	        JButton accountButton = new JButton("Account");
 	        accountButton.setFont(new Font("Tahoma", Font.PLAIN, 16));
 	        accountButton.setBounds(800, 320, 200, 30);
@@ -209,11 +221,11 @@ public class UserPage extends JFrame {
         // 3) Load data from the database into the table
         loadPrograms("");
     }
-    
+
 	    private void loadPrograms(String searchTerm) {
 	        DatabaseYMCA db = new DatabaseYMCA();
 	        db.connect();
-	        
+
 	        try {
 	            String query;
 	            if (searchTerm == null || searchTerm.isEmpty()) {
@@ -222,17 +234,17 @@ public class UserPage extends JFrame {
 	                // Use SQL LIKE for filtering by program name (case-sensitive; adjust as needed)
 	                query = "SELECT * FROM Program WHERE program_name LIKE '%" + searchTerm + "%'";
 	            }
-	            
+
 	            ResultSet rs = db.runQuery(query);
 	            ResultSetMetaData rsmd = rs.getMetaData();
 	            int columnCount = rsmd.getColumnCount();
-	            
+
 	            DefaultTableModel model = new DefaultTableModel();
 	            // Add column names from the ResultSet metadata
 	            for (int i = 1; i <= columnCount; i++) {
 	                model.addColumn(rsmd.getColumnLabel(i));
 	            }
-	            
+
 	            // Add each row from the ResultSet to the model
 	            while (rs.next()) {
 	                Object[] rowData = new Object[columnCount];
@@ -241,7 +253,7 @@ public class UserPage extends JFrame {
 	                }
 	                model.addRow(rowData);
 	            }
-	            
+
 	            rs.close();
 	            programTable.setModel(model);
 	        } catch (SQLException e) {
@@ -250,10 +262,10 @@ public class UserPage extends JFrame {
 	            db.disconnect();
 	        }
 	    }
-	    
+
 	    class TextAreaRenderer extends JTextArea implements TableCellRenderer {
 	        /**
-			 * 
+			 *
 			 */
 			private static final long serialVersionUID = 1L;
 
@@ -262,17 +274,17 @@ public class UserPage extends JFrame {
 	            setWrapStyleWord(true);
 	            setOpaque(true);
 	        }
-	        
+
 	        @Override
 	        public Component getTableCellRendererComponent(JTable table, Object value,
 	                boolean isSelected, boolean hasFocus, int row, int column) {
 	            setText(value == null ? "" : value.toString());
 	            setSize(table.getColumnModel().getColumn(column).getWidth(), getPreferredSize().height);
-	            
+
 	            if (table.getRowHeight(row) != getPreferredSize().height) {
 	                table.setRowHeight(row, getPreferredSize().height);
 	            }
-	            
+
 	            if (isSelected) {
 	                setBackground(table.getSelectionBackground());
 	                setForeground(table.getSelectionForeground());

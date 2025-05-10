@@ -1,12 +1,25 @@
 package gui;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.FlowLayout;
+import java.awt.Image;
+import java.awt.Window;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 
 public class NavBar extends JPanel {
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 1L;
 
@@ -15,20 +28,20 @@ public class NavBar extends JPanel {
         // Here we use FlowLayout with left alignment.
         setLayout(new FlowLayout(FlowLayout.LEFT, 20, 0));
         setBackground(new Color(60, 63, 65));  // A dark background color
-        
+
         // Create navigation buttons
-        
+
         JLabel homeLogo = new JLabel("");
         homeLogo.setHorizontalAlignment(SwingConstants.CENTER);
         Image img = new ImageIcon(LoginPage.class.getResource("/images/ymca-logo.png")).getImage();
         Image newImg = img.getScaledInstance(60, 48, Image.SCALE_SMOOTH);
         homeLogo.setIcon(new ImageIcon(newImg));
-        
+
         JButton programsButton = new JButton("Programs");
         JButton logoutButton = new JButton("Logout");
         JButton loginButton = new JButton("Log In");
-        
-        
+
+
         // Optionally, add action listeners to these buttons to perform navigation.
         // For example:
         // homeButton.addActionListener(e -> { /* navigate to home page */ });
@@ -41,7 +54,7 @@ public class NavBar extends JPanel {
                 if (window != null) {
                     window.dispose();
                 }
-                
+
                 // Schedule creation and display of the login screen on the EDT
                 SwingUtilities.invokeLater(new Runnable() {
                     @Override
@@ -54,7 +67,7 @@ public class NavBar extends JPanel {
                 });
             }
         });
-        
+
         homeLogo.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseReleased(MouseEvent e) {
@@ -63,7 +76,7 @@ public class NavBar extends JPanel {
                 if (window != null) {
                     window.dispose();
                 }
-                
+
                 // Schedule creation and display of the login screen on the EDT
                 SwingUtilities.invokeLater(new Runnable() {
                     @Override
@@ -75,18 +88,18 @@ public class NavBar extends JPanel {
                     }
                 });
             }
-            
+
         @Override
         public void mouseEntered(MouseEvent e) {
         homeLogo.setCursor(new Cursor(Cursor.HAND_CURSOR));
         }
-        
+
         @Override
         public void mouseExited(MouseEvent e) {
         homeLogo.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
         }
         });
-        
+
         // Optionally, add action listeners to these buttons to perform navigation.
         // For example:
         // homeButton.addActionListener(e -> { /* navigate to home page */ });
@@ -99,7 +112,7 @@ public class NavBar extends JPanel {
                 if (window != null) {
                     window.dispose();
                 }
-                
+
                 // Schedule creation and display of the login screen on the EDT
                 SwingUtilities.invokeLater(new Runnable() {
                     @Override
@@ -112,7 +125,7 @@ public class NavBar extends JPanel {
                 });
             }
         });
-        
+
         loginButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -121,7 +134,7 @@ public class NavBar extends JPanel {
                 if (window != null) {
                     window.dispose();
                 }
-                
+
                 // Schedule creation and display of the login screen on the EDT
                 SwingUtilities.invokeLater(new Runnable() {
                     @Override
@@ -134,7 +147,7 @@ public class NavBar extends JPanel {
                 });
             }
         });
-        
+
         programsButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -146,9 +159,9 @@ public class NavBar extends JPanel {
                 new ProgramsPage();
             }
         });
-        
-        
-        
+
+
+
         // Add buttons to the nav bar
         add(homeLogo);
         add(programsButton);

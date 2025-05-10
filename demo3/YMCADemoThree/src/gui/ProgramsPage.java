@@ -1,24 +1,37 @@
 package gui;
 
-import javax.swing.*;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableModel;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+
+import javax.swing.Box;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.SwingConstants;
+import javax.swing.WindowConstants;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
 
 import database.Database;
 import model.Program;
 import model.User;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-
+/**
+ * ProgramsPage displays a list of YMCA programs and allows users (or guests)
+ * to view additional details about each program.
+ */
 public class ProgramsPage extends JFrame {
-    /**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	private JPanel mainPanel;
     private JTable programsTable;
@@ -28,19 +41,19 @@ public class ProgramsPage extends JFrame {
     private User currentUser;
 
     public ProgramsPage() {
-        this(null); // Default constructor for guests
+        this(null); // Load in guest mode if no user
     }
 
     public ProgramsPage(User user) {
         this.currentUser = user;
 
-        pids = new ArrayList<>();
+        pids = new ArrayList<>(); // program ID tracker for detail access
         selectedProgram = new Program();
 
         setTitle("Programs Page");
         setSize(1280, 720);
         setLocationRelativeTo(null);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setResizable(false);
 
         mainPanel = new JPanel();
@@ -48,15 +61,17 @@ public class ProgramsPage extends JFrame {
         mainPanel.setBackground(new Color(49, 49, 49));
         setContentPane(mainPanel);
 
-        // ✅ NavBar swap depending on login
+        // Use correct navbar based on login state
         JComponent navBar = (currentUser == null) ? new NavBar() : new UserNavBar(currentUser);
         navBar.setBounds(0, 0, 1280, 50);
         mainPanel.add(navBar);
 
+        // Button to view more information about selected program
         detailsBtn = new JButton("More Details");
         detailsBtn.setBounds(115, 80, 120, 23);
         mainPanel.add(detailsBtn);
 
+        // Title label
         JLabel titleLabel = new JLabel("Upcoming Programs");
         titleLabel.setForeground(Color.WHITE);
         titleLabel.setFont(new Font("Tahoma", Font.BOLD, 36));
@@ -64,10 +79,12 @@ public class ProgramsPage extends JFrame {
         titleLabel.setBounds(0, 60, 1280, 50);
         mainPanel.add(titleLabel);
 
+        // Scrollable table for program listing
         JScrollPane scrollPane = new JScrollPane();
         scrollPane.setBounds(50, 130, 1180, 500);
         mainPanel.add(scrollPane);
 
+        // Center-align table content
         DefaultTableCellRenderer centerRender = new DefaultTableCellRenderer();
         centerRender.setHorizontalAlignment(SwingConstants.CENTER);
 
@@ -76,16 +93,16 @@ public class ProgramsPage extends JFrame {
         programsTable.setShowVerticalLines(false);
         programsTable.setRowHeight(30);
         programsTable.setRowSelectionAllowed(true);
-
         scrollPane.setViewportView(programsTable);
 
         loadPrograms();
 
-        // Center each column's text
+        // Apply centered rendering to first 4 columns
         for (int i = 0; i < 4; i++) {
             programsTable.getColumnModel().getColumn(i).setCellRenderer(centerRender);
         }
 
+        // Event listener for "More Details" button
         detailsBtn.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -107,6 +124,9 @@ public class ProgramsPage extends JFrame {
         setVisible(true);
     }
 
+    /**
+     * Queries and loads all programs from the database and fills the table.
+     */
     private void loadPrograms() {
         Database db = new Database();
         try {
@@ -140,6 +160,9 @@ public class ProgramsPage extends JFrame {
         }
     }
 
+    /**
+     * Displays a dialog showing detailed information about a selected program.
+     */
     private void showProgramDetails(Program p) {
         Box b = Box.createVerticalBox();
         JDialog jd = new JDialog();
@@ -148,6 +171,7 @@ public class ProgramsPage extends JFrame {
         jd.setTitle("Program Details");
         b.setAlignmentY(Component.CENTER_ALIGNMENT);
 
+        // Program detail labels
         name = new JLabel(p.getProgramName());
         desc = new JLabel(p.getDescription());
         cap = new JLabel((p.getCapacity() - p.getCurrentCapacity()) + " Spots left");
@@ -155,7 +179,7 @@ public class ProgramsPage extends JFrame {
         edate = new JLabel("Program Ends: " + p.getEndDate().toString());
         time = new JLabel(p.getStartTime().toString() + " - " + p.getEndTime().toString());
 
-        // ✅ Personalized pricing
+        // Conditional member pricing
         if (currentUser != null && currentUser.getUserType().equalsIgnoreCase("Member")) {
             mprice = new JLabel(String.format("Your Price: $%.2f", p.getPrice() / 2));
             nmprice = new JLabel(String.format("Full Price: $%.2f", p.getPrice()));
@@ -164,6 +188,7 @@ public class ProgramsPage extends JFrame {
             nmprice = new JLabel(String.format("Non-Member Price: $%.2f", p.getPrice()));
         }
 
+        // Font styling for detail dialog
         name.setFont(new Font("Verdana", Font.PLAIN, 50));
         desc.setFont(new Font("Verdana", Font.PLAIN, 20));
         cap.setFont(new Font("Verdana", Font.PLAIN, 15));
@@ -173,6 +198,7 @@ public class ProgramsPage extends JFrame {
         mprice.setFont(new Font("Verdana", Font.PLAIN, 15));
         nmprice.setFont(new Font("Verdana", Font.PLAIN, 15));
 
+        // Add all labels to vertical box
         b.add(name);
         b.add(Box.createVerticalStrut(10));
         b.add(desc);
@@ -192,7 +218,7 @@ public class ProgramsPage extends JFrame {
         jd.setLocationRelativeTo(mainPanel);
         jd.getContentPane().add(b);
         jd.pack();
-        b.setAlignmentY(JComponent.CENTER_ALIGNMENT);
+        b.setAlignmentY(Component.CENTER_ALIGNMENT);
         jd.setVisible(true);
     }
 }

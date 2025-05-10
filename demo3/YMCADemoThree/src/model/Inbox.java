@@ -2,16 +2,20 @@ package model;
 
 import java.time.LocalDateTime;
 
+/**
+ * The Inbox class represents a single message sent to a user.
+ * Each entry corresponds to a message stored in the user's inbox table.
+ */
 public class Inbox {
-    private Long messageId;
-    private Long userId;
-    private String message;
-    private LocalDateTime dateSent;
+    private Long messageId;           // Unique ID of the message
+    private Long userId;             // ID of the user receiving the message
+    private String message;          // Message content
+    private LocalDateTime dateSent;  // Timestamp of when the message was sent
 
-    // Constructors
-    public Inbox() {
-    }
+    // Default constructor
+    public Inbox() {}
 
+    // Constructor initializing all fields
     public Inbox(Long messageId, Long userId, String message, LocalDateTime dateSent) {
         this.messageId = messageId;
         this.userId = userId;
@@ -20,6 +24,7 @@ public class Inbox {
     }
 
     // Getters and Setters
+
     public Long getMessageId() {
         return messageId;
     }
@@ -50,9 +55,10 @@ public class Inbox {
 
     public void setDateSent(LocalDateTime dateSent) {
         this.dateSent = dateSent;
-        dateSent = LocalDateTime.now();
+        dateSent = LocalDateTime.now();  // Potential mistake: this line overrides the passed value
     }
 
+    // Returns a string representation of the message for logging or debugging
     @Override
     public String toString() {
         return "Inbox{" +

@@ -1,15 +1,29 @@
 package model;
 
+/**
+ * The Dependent class represents a child or family member
+ * associated with a primary User account in the YMCA system.
+ */
 public class Dependent {
+    // Unique identifier for the dependent
     private Long dependentId;
-    private Long userId;  // Parent account
+
+    // ID of the parent User who owns this dependent
+    private Long userId;
+
+    // Name of the dependent
     private String name;
+
+    // Relationship of the dependent to the parent user (e.g., child, spouse)
     private String relationship;
+
+    // Birthdate of the dependent in string format (e.g., "2009-06-12")
     private String birthdate;
 
-    public Dependent() {
-    }
+    // Default constructor
+    public Dependent() {}
 
+    // Full constructor with all fields
     public Dependent(Long dependentId, Long userId, String name, String relationship, String birthdate) {
         this.dependentId = dependentId;
         this.userId = userId;
@@ -17,6 +31,8 @@ public class Dependent {
         this.relationship = relationship;
         this.birthdate = birthdate;
     }
+
+    // Getters and Setters
 
     public Long getDependentId() {
         return dependentId;
@@ -58,4 +74,3 @@ public class Dependent {
         this.birthdate = birthdate;
     }
 }
-

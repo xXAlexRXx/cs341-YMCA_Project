@@ -1,22 +1,27 @@
 package gui;
 
-import javax.swing.*;
-
-import database.DatabaseYMCA;
-
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Font;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+import javax.swing.WindowConstants;
+
+import database.DatabaseYMCA;
+
 public class RegistrationPage extends JFrame {
-    
+
     private static final long serialVersionUID = 1L;
 
     public RegistrationPage(long programId, long userId) {
         setSize(600, 400);
         setLocationRelativeTo(null);
         setTitle("Registration Complete");
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
         JPanel panel = new JPanel();
         panel.setBackground(new Color(49, 49, 49));

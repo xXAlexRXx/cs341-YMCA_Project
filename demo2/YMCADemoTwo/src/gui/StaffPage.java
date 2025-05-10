@@ -1,11 +1,23 @@
 package gui;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.FlowLayout;
+import java.awt.Font;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
-import javax.swing.*;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.WindowConstants;
 
 import database.Database;
 import model.Program;
@@ -27,7 +39,7 @@ public class StaffPage extends JFrame {
         setLocationRelativeTo(null);
         setResizable(false);
         setTitle("Staff Work Page");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         staffPane = new JPanel();
         staffPane.setBackground(new Color(49, 49, 49));
@@ -43,14 +55,16 @@ public class StaffPage extends JFrame {
         field.setText(placeholder);
 
         field.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusGained(java.awt.event.FocusEvent e) {
+            @Override
+			public void focusGained(java.awt.event.FocusEvent e) {
                 if (field.getText().equals(placeholder)) {
                     field.setText("");
                     field.setForeground(Color.BLACK);
                 }
             }
 
-            public void focusLost(java.awt.event.FocusEvent e) {
+            @Override
+			public void focusLost(java.awt.event.FocusEvent e) {
                 if (field.getText().isEmpty()) {
                     field.setForeground(Color.GRAY);
                     field.setText(placeholder);

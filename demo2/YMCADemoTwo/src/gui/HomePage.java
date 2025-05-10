@@ -1,13 +1,19 @@
 package gui;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
-import javax.swing.*;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+import javax.swing.WindowConstants;
 import javax.swing.table.DefaultTableModel;
 
 import database.Database;
@@ -22,7 +28,7 @@ public class HomePage extends JFrame {
         setLocationRelativeTo(null);
         setResizable(false);
         setTitle("YMCA Home");
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
         startUpPane = new JPanel();
         startUpPane.setBackground(new Color(49, 49, 49));
@@ -74,8 +80,8 @@ public class HomePage extends JFrame {
         logInBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                dispose();
-                new LoginPage();
+            	new LoginPage();
+            	dispose();
             }
         });
 
@@ -88,8 +94,8 @@ public class HomePage extends JFrame {
         programsBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                dispose();
-                new ProgramsPage();
+            	new ProgramsPage();
+            	dispose();
             }
         });
 

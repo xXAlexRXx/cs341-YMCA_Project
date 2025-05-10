@@ -1,17 +1,28 @@
 package gui;
 
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.WindowConstants;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+
 import database.Database;
 import model.User;
 
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
-import java.awt.*;
-import java.sql.*;
-
 public class AdminPage extends JFrame {
-    /**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	private User currentUser;
     private JTable userTable;
@@ -19,6 +30,7 @@ public class AdminPage extends JFrame {
     private JTextField searchField;
     private JButton searchButton, suspendButton, reportButton;
     private JTextField startDateField, endDateField;
+    DefaultTableCellRenderer centerRender;
 
     public AdminPage(User user) {
         this.currentUser = user;
@@ -26,9 +38,13 @@ public class AdminPage extends JFrame {
         setTitle("Admin Panel");
         setSize(1280, 720);
         setLocationRelativeTo(null);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setLayout(null);
         getContentPane().setBackground(new Color(49, 49, 49));
+
+        // Create cell renderer that centers rows
+        centerRender = new DefaultTableCellRenderer();
+        centerRender.setHorizontalAlignment(SwingConstants.CENTER);
 
         // Navigation bar
         UserNavBar navBar = new UserNavBar(currentUser);
@@ -74,11 +90,14 @@ public class AdminPage extends JFrame {
 
         reportButton.addActionListener(e -> generateReport());
 
-        // Table
+        // Table setup
         tableModel = new DefaultTableModel();
         tableModel.setColumnIdentifiers(new String[]{"User ID", "Username", "Email", "User Type", "Status"});
 
         userTable = new JTable(tableModel);
+        userTable.setShowVerticalLines(false);
+        userTable.setRowHeight(30);
+        userTable.setRowSelectionAllowed(true);
         JScrollPane scrollPane = new JScrollPane(userTable);
         scrollPane.setBounds(50, 150, 1000, 400);
         add(scrollPane);
@@ -112,8 +131,14 @@ public class AdminPage extends JFrame {
                 });
             }
 
+            // Center row values
+            for(int i = 0; i < 5; i++) {
+                userTable.getColumnModel().getColumn(i).setCellRenderer(centerRender);
+            }
+
             rs.close();
             stmt.close();
+
             db.disconnect();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -134,7 +159,9 @@ public class AdminPage extends JFrame {
         int confirm = JOptionPane.showConfirmDialog(this,
                 "Are you sure you want to suspend/delete user: " + username + "?",
                 "Confirm Suspension", JOptionPane.YES_NO_OPTION);
-        if (confirm != JOptionPane.YES_OPTION) return;
+        if (confirm != JOptionPane.YES_OPTION) {
+			return;
+		}
 
         Database db = new Database();
         try {
@@ -148,7 +175,7 @@ public class AdminPage extends JFrame {
             stmt.close();
 
             // Delete registrations
-            String deleteRegs = "DELETE FROM Registration WHERE participant_user_id = ? OR registered_by_user_id = ?";
+            String deleteRegs = "DELETE FROM Registration WHERE participant_user_id = ? OR user_id = ?";
             PreparedStatement delStmt = db.getConnection().prepareStatement(deleteRegs);
             delStmt.setLong(1, userId);
             delStmt.setLong(2, userId);
@@ -195,8 +222,16 @@ public class AdminPage extends JFrame {
             }
 
             JTable reportTable = new JTable(reportModel);
+            reportTable.setShowVerticalLines(false);
+            reportTable.setRowHeight(30);
+            reportTable.setRowSelectionAllowed(false);
             JScrollPane scrollPane = new JScrollPane(reportTable);
             scrollPane.setPreferredSize(new Dimension(800, 400));
+
+            // Center row values
+            for(int i = 0; i < 3; i++) {
+                reportTable.getColumnModel().getColumn(i).setCellRenderer(centerRender);
+            }
 
             JOptionPane.showMessageDialog(this, scrollPane, "Registrations Report", JOptionPane.INFORMATION_MESSAGE);
 

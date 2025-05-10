@@ -1,47 +1,75 @@
 package gui;
 
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.SwingConstants;
+import javax.swing.WindowConstants;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+
 import database.Database;
 import model.User;
 
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
-import java.awt.*;
-import java.sql.*;
-
+/**
+ * DropProgramPage allows a user to view their and their dependents' current
+ * registrations and remove (drop) them from programs.
+ */
 public class DropProgramPage extends JFrame {
-    /**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	private User currentUser;
     private JTable registrationTable;
     private DefaultTableModel model;
+    DefaultTableCellRenderer centerRender;
 
     public DropProgramPage(User user) {
         this.currentUser = user;
         setTitle("Drop Program");
         setSize(800, 600);
         setLocationRelativeTo(null);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout());
 
+        // Set up registration table with headers
         registrationTable = new JTable();
+        registrationTable.setShowVerticalLines(false);
+        registrationTable.setRowHeight(30);
+        registrationTable.setRowSelectionAllowed(true);
         model = new DefaultTableModel(new Object[]{"Participant", "Program ID", "Program Name", "Start Date", "Location"}, 0);
         registrationTable.setModel(model);
 
         JScrollPane scrollPane = new JScrollPane(registrationTable);
         add(scrollPane, BorderLayout.CENTER);
 
+        // Button panel for dropping selected registration
         JButton dropButton = new JButton("Drop Selected Program");
         dropButton.addActionListener(e -> dropSelectedProgram());
-
         JPanel bottomPanel = new JPanel(new FlowLayout());
         bottomPanel.add(dropButton);
         add(bottomPanel, BorderLayout.SOUTH);
 
-        loadRegistrations();
+        loadRegistrations(); // populate table
+
+        // Center text in each cell
+        centerRender = new DefaultTableCellRenderer();
+        centerRender.setHorizontalAlignment(SwingConstants.CENTER);
+        for (int i = 0; i < registrationTable.getColumnCount(); i++) {
+            registrationTable.getColumnModel().getColumn(i).setCellRenderer(centerRender);
+        }
     }
 
+    /**
+     * Loads registrations for the user and their dependents into the table.
+     */
     private void loadRegistrations() {
         Database db = new Database();
         model.setRowCount(0); // clear existing
@@ -89,6 +117,9 @@ public class DropProgramPage extends JFrame {
         }
     }
 
+    /**
+     * Removes the selected registration from the database and updates the view.
+     */
     private void dropSelectedProgram() {
         int row = registrationTable.getSelectedRow();
         if (row == -1) {
@@ -105,7 +136,9 @@ public class DropProgramPage extends JFrame {
                 "Confirm Drop",
                 JOptionPane.YES_NO_OPTION);
 
-        if (confirm != JOptionPane.YES_OPTION) return;
+        if (confirm != JOptionPane.YES_OPTION) {
+			return;
+		}
 
         Database db = new Database();
         try {
@@ -114,11 +147,10 @@ public class DropProgramPage extends JFrame {
             Long participantId = null;
             boolean isDependent = false;
 
-            // Check if participant is user or dependent
+            // Determine if dropping user or dependent
             if (participant.equals(currentUser.getUsername())) {
                 participantId = currentUser.getUserId();
             } else {
-                // Get dependent ID
                 PreparedStatement stmt = db.getConnection().prepareStatement(
                         "SELECT dependent_id FROM Dependent WHERE name = ? AND user_id = ?");
                 stmt.setString(1, participant);
@@ -132,7 +164,7 @@ public class DropProgramPage extends JFrame {
                 stmt.close();
             }
 
-            // Remove from Registration
+            // Delete registration entry
             String deleteSql = isDependent ?
                     "DELETE FROM Registration WHERE program_id = ? AND participant_dependent_id = ?" :
                     "DELETE FROM Registration WHERE program_id = ? AND participant_user_id = ?";
@@ -142,15 +174,16 @@ public class DropProgramPage extends JFrame {
             deleteStmt.executeUpdate();
             deleteStmt.close();
 
-            // Decrement capacity
+            // Update program capacity
             db.decrementCurrentCapacity(programId);
 
-            // Inbox message
+            // Notify user in inbox
             String message = "You have been dropped from: " + programName;
             db.sendMessageToInbox(currentUser.getUserId(), message);
 
             model.removeRow(row);
             JOptionPane.showMessageDialog(this, "Program successfully dropped.");
+            loadRegistrations(); // refresh table
 
         } catch (SQLException e) {
             e.printStackTrace();

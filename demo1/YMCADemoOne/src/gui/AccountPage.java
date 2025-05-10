@@ -3,48 +3,59 @@ package gui;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Window;
-import java.sql.*;
-import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
 import javax.swing.table.DefaultTableModel;
 
 import database.DatabaseYMCA;
 import model.User;
 
-import java.awt.event.*;
-
 public class AccountPage extends JFrame {
-    
+
     private static final long serialVersionUID = 1L;
     private User currentUser;
     private JPanel accountPane;
     private JTable registrationTable;
     private JButton backToPrograms;
-    
+
     public AccountPage(User user) {
         this.currentUser = user;
-        
+
         setSize(1280, 720);
         setLocationRelativeTo(null);
         setResizable(false);
         setTitle("Account Page");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         accountPane = new JPanel();
         accountPane.setBackground(new Color(49, 49, 49));
         accountPane.setLayout(null);
         setContentPane(accountPane);
-        
+
         initializeComponents();
-        
+
         setVisible(true);
     }
-    
+
     private void initializeComponents() {
         // NavBar (if you want to pass user info to NavBar, adjust its constructor accordingly)
         NavBar navBar = new NavBar();
         navBar.setBounds(0, 0, 1280, 50);
         accountPane.add(navBar);
-        
+
         // Title label
         JLabel titleLabel = new JLabel("My Account");
         titleLabel.setForeground(Color.WHITE);
@@ -64,7 +75,7 @@ public class AccountPage extends JFrame {
         userTypeLabel.setFont(new Font("Tahoma", Font.PLAIN, 16));
         userTypeLabel.setBounds(50, 140, 300, 30);
         accountPane.add(userTypeLabel);
-        
+
         // New Balance label
         JLabel balanceLabel = new JLabel("Balance: " + currentUser.getUserBalance());
         balanceLabel.setForeground(Color.WHITE);
@@ -79,7 +90,7 @@ public class AccountPage extends JFrame {
 
         registrationTable = new JTable();
         scrollPane.setViewportView(registrationTable);
-        
+
         // Button to view programs (takes you back to the UserPage)
         backToPrograms = new JButton("View Programs");
         backToPrograms.setFont(new Font("Tahoma", Font.PLAIN, 16));
@@ -96,10 +107,10 @@ public class AccountPage extends JFrame {
                 new UserPage(currentUser);
             }
         });
-        
+
         loadUserRegistrations();
     }
-    
+
     /**
      * Loads all programs for which the current user is registered
      * and populates the registrationTable.
@@ -107,15 +118,15 @@ public class AccountPage extends JFrame {
     private void loadUserRegistrations() {
         DatabaseYMCA db = new DatabaseYMCA();
         db.connect();
-        
+
         try {
             // Query to join Registration & Program tables for the user
             String query = db.getProgramsForUser(currentUser.getUserId());
-            
+
             ResultSet rs = db.runQuery(query);
             ResultSetMetaData rsmd = rs.getMetaData();
             int columnCount = rsmd.getColumnCount();
-            
+
             DefaultTableModel model = new DefaultTableModel();
             // Add column names from metadata
             for (int i = 1; i <= columnCount; i++) {
@@ -129,15 +140,15 @@ public class AccountPage extends JFrame {
                 }
                 model.addRow(rowData);
             }
-            
+
             registrationTable.setModel(model);
             rs.close();
         } catch (SQLException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(
-                accountPane, 
+                accountPane,
                 "Error loading registrations: " + e.getMessage(),
-                "Error", 
+                "Error",
                 JOptionPane.ERROR_MESSAGE
             );
         } finally {

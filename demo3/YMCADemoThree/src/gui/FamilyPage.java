@@ -1,23 +1,35 @@
 package gui;
 
+import java.awt.Color;
+import java.awt.Font;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.WindowConstants;
+import javax.swing.table.DefaultTableModel;
+
 import database.Database;
 import model.User;
 
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
-import java.awt.*;
-import java.sql.*;
-
+/**
+ * FamilyPage provides an interface to manage family members and dependents.
+ * Users can add registered family accounts and create/edit dependents linked to their account.
+ */
 public class FamilyPage extends JFrame {
-    /**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	private User currentUser;
     private JTable familyTable, dependentsTable;
     private JTextField familyUsernameField;
     private DefaultTableModel dependentsModel;
-
     private JTextField depNameField, depBirthField, depRelField;
 
     public FamilyPage(User user) {
@@ -25,11 +37,12 @@ public class FamilyPage extends JFrame {
 
         setTitle("Family Management");
         setSize(1280, 720);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
         getContentPane().setLayout(null);
         getContentPane().setBackground(new Color(49, 49, 49));
 
+        // Top navigation
         UserNavBar navBar = new UserNavBar(currentUser);
         navBar.setBounds(0, 0, 1280, 50);
         getContentPane().add(navBar);
@@ -40,7 +53,7 @@ public class FamilyPage extends JFrame {
         title.setBounds(50, 60, 500, 30);
         getContentPane().add(title);
 
-        // 🔹 Add Family Section
+        // Add Family Member Section
         JLabel famLabel = new JLabel("Add Family Member (Username):");
         famLabel.setForeground(Color.WHITE);
         famLabel.setBounds(50, 110, 250, 20);
@@ -60,7 +73,7 @@ public class FamilyPage extends JFrame {
         scrollPane.setBounds(50, 180, 600, 250);
         getContentPane().add(scrollPane);
 
-        // 🔹 Add Dependent Section
+        // Add Dependent Section
         JLabel depLabel = new JLabel("Add Dependent:");
         depLabel.setFont(new Font("Tahoma", Font.BOLD, 16));
         depLabel.setForeground(Color.WHITE);
@@ -100,7 +113,7 @@ public class FamilyPage extends JFrame {
         getContentPane().add(addDepBtn);
         addDepBtn.addActionListener(e -> addDependent());
 
-        // 🔹 Dependents Table
+        // Dependents Table
         JLabel depTableLabel = new JLabel("Your Dependents:");
         depTableLabel.setForeground(Color.WHITE);
         depTableLabel.setBounds(700, 280, 200, 20);
@@ -112,6 +125,7 @@ public class FamilyPage extends JFrame {
         depScrollPane.setBounds(700, 310, 400, 200);
         getContentPane().add(depScrollPane);
 
+        // Back to account
         JButton backBtn = new JButton("Back to Account");
         backBtn.setBounds(50, 500, 200, 30);
         backBtn.addActionListener(e -> {
@@ -124,6 +138,7 @@ public class FamilyPage extends JFrame {
         loadDependents();
     }
 
+    // Loads family member usernames into the left table
     private void loadFamilyMembers() {
         Database db = new Database();
         try {
@@ -158,6 +173,7 @@ public class FamilyPage extends JFrame {
         }
     }
 
+    // Loads dependent data for display in right table
     private void loadDependents() {
         dependentsModel.setRowCount(0);
         Database db = new Database();
@@ -186,6 +202,7 @@ public class FamilyPage extends JFrame {
         }
     }
 
+    // Adds a registered user as a family member if valid
     private void addFamilyMember() {
         String famUsername = familyUsernameField.getText().trim();
         if (famUsername.isEmpty()) {
@@ -198,6 +215,7 @@ public class FamilyPage extends JFrame {
             db.connect();
             long userId = currentUser.getUserId();
 
+            // Limit to 10 family members
             PreparedStatement checkStmt = db.getConnection().prepareStatement("SELECT COUNT(*) FROM FamilyMember WHERE user_id = ?");
             checkStmt.setLong(1, userId);
             ResultSet rsCount = checkStmt.executeQuery();
@@ -208,6 +226,7 @@ public class FamilyPage extends JFrame {
             rsCount.close();
             checkStmt.close();
 
+            // Lookup user by username
             PreparedStatement findStmt = db.getConnection().prepareStatement("SELECT user_id FROM User WHERE username = ?");
             findStmt.setString(1, famUsername);
             ResultSet rs = findStmt.executeQuery();
@@ -238,6 +257,7 @@ public class FamilyPage extends JFrame {
         }
     }
 
+    // Adds a dependent to the current user
     private void addDependent() {
         String name = depNameField.getText().trim();
         String birthdate = depBirthField.getText().trim();

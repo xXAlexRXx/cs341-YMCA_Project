@@ -1,21 +1,36 @@
 package gui;
 
-import java.awt.*;
-import javax.swing.*;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Font;
+import java.awt.Image;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.sql.SQLException;
+
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFormattedTextField;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.SwingConstants;
+import javax.swing.WindowConstants;
 
 import database.Database;
 import model.User;
 import security.PasswordHash;
 
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.sql.SQLException;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-
-
+/**
+ * LoginPage allows users to authenticate with a username and password.
+ * It verifies login credentials and redirects based on user type.
+ */
 public class LoginPage extends JFrame {
-    
+
     private static final long serialVersionUID = 1L;
     private JPanel loginPane;
     private JPasswordField password;
@@ -30,63 +45,68 @@ public class LoginPage extends JFrame {
     public LoginPage() {
         setResizable(false);
         setTitle("YMCA Login");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+
         loginPane = new JPanel();
         loginPane.setBackground(new Color(49, 49, 49));
         setContentPane(loginPane);
         loginPane.setLayout(null);
 
         initializeComponents(loginPane);
-        
-        setSize(1280, 720);      // <<< ADD THIS
-        setLocationRelativeTo(null);  // <<< ADD THIS to center it on screen
+
+        setSize(1280, 720);
+        setLocationRelativeTo(null);
         setVisible(true);
     }
-    
+
+    /**
+     * Initializes all form elements, event listeners, and visual labels.
+     */
     private void initializeComponents(JPanel contentPane) {
         // Username field
         username = new JFormattedTextField();
         username.setFont(new Font("Tahoma", Font.PLAIN, 15));
         username.setBounds(550, 343, 150, 30);
         contentPane.add(username);
-        
+
         // Password field
         password = new JPasswordField();
         password.setFont(new Font("Tahoma", Font.PLAIN, 15));
         password.setBounds(550, 384, 150, 30);
         contentPane.add(password);
-        
+
         // Login button
         loginBtn = new JButton("Login");
-        loginBtn.setFont(new Font("Tahoma", Font.PLAIN, 15));
+        loginBtn.setFont(new Font("Tahoma", Font.PLAIN, 18));
         loginBtn.setBounds(582, 438, 89, 23);
         contentPane.add(loginBtn);
         loginBtn.setEnabled(false);
-        
-        // Labels
+
+        // Username label
         usernameLabel = new JLabel("Username");
         usernameLabel.setHorizontalAlignment(SwingConstants.TRAILING);
-        usernameLabel.setFont(new Font("Tahoma", Font.PLAIN, 15));
+        usernameLabel.setFont(new Font("Tahoma", Font.PLAIN, 18));
         usernameLabel.setForeground(Color.WHITE);
-        usernameLabel.setBounds(452, 343, 75, 30);
+        usernameLabel.setBounds(431, 343, 96, 30);
         contentPane.add(usernameLabel);
-        
+
+        // Password label
         passwordLabel = new JLabel("Password");
         passwordLabel.setHorizontalAlignment(SwingConstants.TRAILING);
-        passwordLabel.setFont(new Font("Tahoma", Font.PLAIN, 15));
+        passwordLabel.setFont(new Font("Tahoma", Font.PLAIN, 18));
         passwordLabel.setForeground(Color.WHITE);
-        passwordLabel.setBounds(452, 383, 75, 30);
+        passwordLabel.setBounds(431, 383, 96, 30);
         contentPane.add(passwordLabel);
-        
-        // Welcome label
+
+        // Welcome label text
         welcome = new JLabel("Welcome to");
         welcome.setForeground(new Color(66, 160, 255));
         welcome.setHorizontalAlignment(SwingConstants.TRAILING);
         welcome.setFont(new Font("Times New Roman", Font.BOLD | Font.ITALIC, 50));
         welcome.setBounds(10, 129, 644, 93);
         contentPane.add(welcome);
-        
+
+        // YMCA logo
         JLabel logo = new JLabel("");
         logo.setHorizontalAlignment(SwingConstants.CENTER);
         Image img = new ImageIcon(LoginPage.class.getResource("/images/ymca-logo.png")).getImage();
@@ -94,25 +114,38 @@ public class LoginPage extends JFrame {
         logo.setIcon(new ImageIcon(newImg));
         logo.setBounds(664, 61, 259, 200);
         contentPane.add(logo);
-        
-        // Wrong login message
+
+        // Error label for wrong credentials
         wrongLogin = new JLabel("*Incorrect Username or Password Input*");
         wrongLogin.setHorizontalAlignment(SwingConstants.CENTER);
-        wrongLogin.setFont(new Font("Tahoma", Font.PLAIN, 14));
+        wrongLogin.setFont(new Font("Tahoma", Font.PLAIN, 15));
         wrongLogin.setForeground(Color.RED);
-        wrongLogin.setBounds(493, 472, 275, 14);
+        wrongLogin.setBounds(493, 472, 275, 23);
         contentPane.add(wrongLogin);
         wrongLogin.setVisible(false);
-        
-        // Password length message
+
+        // Password validation message
         passLength = new JLabel("Password must contain at least 8 characters");
-        passLength.setFont(new Font("Tahoma", Font.PLAIN, 14));
+        passLength.setFont(new Font("Tahoma", Font.PLAIN, 15));
         passLength.setForeground(Color.RED);
         passLength.setBounds(710, 393, 300, 14);
         contentPane.add(passLength);
         passLength.setVisible(false);
-        
-        // Password key listener for enabling login button
+
+        // Account creation prompt
+        JLabel createLabel = new JLabel("<html><center>Don't have an account?</html>");
+        createLabel.setForeground(Color.WHITE);
+        createLabel.setFont(new Font("Tahoma", Font.PLAIN, 20));
+        createLabel.setBounds(552, 497, 159, 93);
+        loginPane.add(createLabel);
+
+        // Button to navigate to account creation page
+        JButton createButton = new JButton("<html>Create An Account</html>");
+        createButton.setFont(new Font("Tahoma", Font.PLAIN, 18));
+        createButton.setBounds(527, 578, 215, 38);
+        loginPane.add(createButton);
+
+        // Password length enforcement on key release
         password.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
@@ -127,51 +160,43 @@ public class LoginPage extends JFrame {
             }
         });
         password.setText("");
-        
-        // Login button action listener
+
+        // Main login process logic on button click
         loginBtn.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                // Retrieve the username and password from the form
                 String userText = username.getText();
                 String passText = new String(password.getPassword());
-                
                 String encrypted = PasswordHash.encrypt(passText);
 
-                // Create an instance of your DatabaseYMCA
                 Database db = new Database();
                 try {
                     db.connect();
-                    // Attempt to retrieve a user matching the given credentials
                     User user = db.getUserByUsernameAndPassword(userText, encrypted);
-                    
-                    
-                    
+
                     if (user != null) {
-                    	if (user.getStatus() != null && user.getStatus().equalsIgnoreCase("suspended")) {
+                        if (user.getStatus() != null && user.getStatus().equalsIgnoreCase("suspended")) {
                             JOptionPane.showMessageDialog(null, "Your account is suspended.");
                             return;
                         }
-                    	
-                        // Successful login - check user type and redirect accordingly
-                    	if (user.getUserType().equalsIgnoreCase("Admin")) {
-                    	    setVisible(false);
-                    	    dispose();
-                    	    new AdminPage(user);
-                    	} else if (user.getUserType().equalsIgnoreCase("Staff")) {
-                    	    setVisible(false);
-                    	    dispose();
-                    	    new StaffPage(user);
-                    	} else if (user.getUserType().equalsIgnoreCase("Member") || user.getUserType().equalsIgnoreCase("User")) {
-                    	    setVisible(false);
-                    	    dispose();
-                    	    new MemberPage(user);
-                    	} else {
-                    	    // Unrecognized user type – display error message
-                    	    wrongLogin.setVisible(true);
-                    	}
+
+                        // Redirect based on role
+                        if (user.getUserType().equalsIgnoreCase("Admin")) {
+                            setVisible(false);
+                            dispose();
+                            new AdminPage(user);
+                        } else if (user.getUserType().equalsIgnoreCase("Staff")) {
+                            setVisible(false);
+                            dispose();
+                            new StaffPage(user);
+                        } else if (user.getUserType().equalsIgnoreCase("Member") || user.getUserType().equalsIgnoreCase("User")) {
+                            setVisible(false);
+                            dispose();
+                            new MemberPage(user);
+                        } else {
+                            wrongLogin.setVisible(true);
+                        }
                     } else {
-                        // No matching user found
                         wrongLogin.setVisible(true);
                     }
                 } catch (SQLException ex) {
@@ -182,19 +207,31 @@ public class LoginPage extends JFrame {
                 }
             }
         });
-        // logo mouse listener
+
+        // Logo as clickable link back to homepage
         logo.addMouseListener(new MouseAdapter() {
-        	@Override
-        	public void mouseEntered(MouseEvent e) {
-        		logo.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        	}
-        	public void mouseExited(MouseEvent e) {
-        		logo.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-        	}
-        	public void mouseReleased(MouseEvent e) {
-        		dispose();
-        		new HomePage();
-        	}
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                logo.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            }
+            @Override
+			public void mouseExited(MouseEvent e) {
+                logo.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+            }
+            @Override
+			public void mouseReleased(MouseEvent e) {
+                dispose();
+                new HomePage();
+            }
+        });
+
+        // Navigate to account creation
+        createButton.addMouseListener(new MouseAdapter() {
+            @Override
+			public void mouseReleased(MouseEvent e) {
+                dispose();
+                new AccountCreationPage();
+            }
         });
     }
 }

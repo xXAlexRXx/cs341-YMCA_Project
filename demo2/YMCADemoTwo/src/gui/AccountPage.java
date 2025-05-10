@@ -3,10 +3,23 @@ package gui;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Window;
-import java.awt.event.*;
-import java.sql.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 
-import javax.swing.*;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
 import javax.swing.table.DefaultTableModel;
 
 import database.Database;
@@ -28,7 +41,7 @@ public class AccountPage extends JFrame {
         setLocationRelativeTo(null);
         setResizable(false);
         setTitle("Account Page");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         accountPane = new JPanel();
         accountPane.setBackground(new Color(49, 49, 49));
@@ -104,7 +117,8 @@ public class AccountPage extends JFrame {
         accountPane.add(addFamilyButton);
 
         addFamilyButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+            @Override
+			public void actionPerformed(ActionEvent e) {
                 String familyMemberName = familyNameField.getText().trim();
                 if (familyMemberName.isEmpty()) {
                     JOptionPane.showMessageDialog(accountPane, "Family Member Username cannot be empty");

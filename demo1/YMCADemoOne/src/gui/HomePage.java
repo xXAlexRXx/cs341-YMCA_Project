@@ -2,23 +2,31 @@ package gui;
 
 import java.awt.Color;
 import java.awt.Font;
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
-
-import database.DatabaseYMCA;
-
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.WindowConstants;
+import javax.swing.table.DefaultTableModel;
+
+import database.DatabaseYMCA;
+
 public class HomePage extends JFrame {
 
     private static final long serialVersionUID = 1L;
     private JPanel startUpPane;
     private JTable programTable;
-    
+
     // New search components:
     private JTextField searchField;
     private JButton searchButton;
@@ -28,7 +36,7 @@ public class HomePage extends JFrame {
         setLocationRelativeTo(null);
         setResizable(false);
         setTitle("Start Up Page");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         startUpPane = new JPanel();
         startUpPane.setBackground(new Color(49, 49, 49));
@@ -93,7 +101,7 @@ public class HomePage extends JFrame {
     private void loadPrograms(String searchTerm) {
         DatabaseYMCA db = new DatabaseYMCA();
         db.connect();
-        
+
         try {
             String query;
             if (searchTerm == null || searchTerm.isEmpty()) {
@@ -102,17 +110,17 @@ public class HomePage extends JFrame {
                 // Use SQL LIKE for filtering by program name (case-sensitive; adjust as needed)
                 query = "SELECT * FROM Program WHERE program_name LIKE '%" + searchTerm + "%'";
             }
-            
+
             ResultSet rs = db.runQuery(query);
             ResultSetMetaData rsmd = rs.getMetaData();
             int columnCount = rsmd.getColumnCount();
-            
+
             DefaultTableModel model = new DefaultTableModel();
             // Add column names from the ResultSet metadata
             for (int i = 1; i <= columnCount; i++) {
                 model.addColumn(rsmd.getColumnLabel(i));
             }
-            
+
             // Add each row from the ResultSet to the model
             while (rs.next()) {
                 Object[] rowData = new Object[columnCount];
@@ -121,7 +129,7 @@ public class HomePage extends JFrame {
                 }
                 model.addRow(rowData);
             }
-            
+
             rs.close();
             programTable.setModel(model);
         } catch (SQLException e) {
@@ -130,6 +138,6 @@ public class HomePage extends JFrame {
             db.disconnect();
         }
     }
-    
-  
+
+
 }

@@ -16,7 +16,7 @@ public class Program {
     private String location;
     private double price;
     private int requirements;
-    
+
     // Default constructor
     public Program() {
     }
@@ -56,7 +56,7 @@ public class Program {
     public String getDescription() {
         return description;
     }
-    
+
     public void setDescription(String description) {
         this.description = description;
     }
@@ -64,62 +64,62 @@ public class Program {
     public int getCapacity() {
         return capacity;
     }
-    
+
     public void setCapacity(int capacity) {
         this.capacity = capacity;
     }
-    
+
     public int getCurrentCapacity() {
         return currentCapacity;
     }
-    
+
     public void setCurrentCapacity(int currentCapacity) {
         this.currentCapacity = currentCapacity;
     }
-    
+
     public LocalDate getStartDate() {
         return startDate;
     }
-    
+
     public LocalDate getEndDate() {
         return endDate;
     }
-    
+
     public void setStartDate(LocalDate date) {
         this.startDate = date;
     }
-    
+
     public void setEndDate(LocalDate date) {
         this.endDate = date;
     }
-    
+
     public LocalTime getStartTime() {
         return startTime;
     }
-    
+
     public LocalTime getEndTime() {
     	return endTime;
     }
-    
+
     public void setStartTime(LocalTime startTime) {
         this.startTime = startTime;
     }
-    
+
     public void setEndTime(LocalTime endTime) {
     	this.endTime = endTime;
     }
-    
+
     public String getLocation() {
     	return location;
     }
-    
+
     public void setLocation(String location) {
     	this.location = location;
     }
     public int getRequirements() {
         return requirements;
     }
-    
+
     public void setRequirements(int requirements) {
         this.requirements = requirements;
     }
@@ -139,6 +139,6 @@ public class Program {
 	public void setPrice(double price) {
 		this.price = price;
 	}
-    
-    
+
+
 }

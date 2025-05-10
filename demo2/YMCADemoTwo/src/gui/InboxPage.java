@@ -1,10 +1,17 @@
 package gui;
 
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Font;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import javax.swing.*;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.SwingConstants;
+import javax.swing.WindowConstants;
 import javax.swing.table.DefaultTableModel;
 
 import database.Database;
@@ -12,7 +19,7 @@ import model.User;
 
 public class InboxPage extends JFrame {
     /**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 1L;
 	private JTable inboxTable;
@@ -23,7 +30,7 @@ public class InboxPage extends JFrame {
 
         setTitle("Inbox");
         setSize(600, 400);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null); // Center the window
 
         setLayout(new BorderLayout());

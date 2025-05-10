@@ -1,6 +1,8 @@
 package gui;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.sql.ResultSet;
@@ -8,7 +10,16 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-import javax.swing.*;
+import javax.swing.Box;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.SwingConstants;
+import javax.swing.WindowConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
@@ -17,7 +28,7 @@ import model.Program;
 
 public class ProgramsPage extends JFrame {
     /**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 1L;
 	private JPanel mainPanel;
@@ -28,13 +39,13 @@ public class ProgramsPage extends JFrame {
 
     public ProgramsPage() {
 
-    	pids = new ArrayList<Long>();
+    	pids = new ArrayList<>();
     	selectedProgram = new Program();
 
         setTitle("Programs Page");
         setSize(1280, 720);
         setLocationRelativeTo(null);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setResizable(false);
 
         mainPanel = new JPanel();
@@ -211,7 +222,7 @@ public class ProgramsPage extends JFrame {
 
     	jd.getContentPane().add(b);
     	jd.pack();
-    	b.setAlignmentY(JComponent.CENTER_ALIGNMENT);
+    	b.setAlignmentY(Component.CENTER_ALIGNMENT);
     	jd.setVisible(true);
 
     }
